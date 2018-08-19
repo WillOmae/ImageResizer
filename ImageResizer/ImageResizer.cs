@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 
@@ -17,7 +18,7 @@ namespace WillOmae
         /// Desired width
         /// </summary>
         private int boxWidth;
-
+        
         /// <summary>
         /// Default constructor
         /// </summary>
@@ -31,16 +32,25 @@ namespace WillOmae
         /// <summary>
         /// Resize the image
         /// </summary>
-        /// <param name="oldPath">Path to the source image</param>
-        /// <param name="newPath">Path to the resized image</param>
+        /// <param name="srcPath">Path to the source image</param>
+        /// <param name="destPath">Path to the resized image</param>
         /// <returns>Is successful?</returns>
-        public bool Resize(string oldPath, string newPath)
+        public bool Resize(string srcPath, string destPath)
         {
+            if (string.IsNullOrEmpty(srcPath))
+            {
+                throw new ArgumentNullException("srcPath", "String is null or empty");
+            }
+            if (string.IsNullOrEmpty(destPath))
+            {
+                throw new ArgumentNullException("destPath", "String is null or empty");
+            }
+
             // Check for the existence of the source image
-            if (File.Exists(oldPath))
+            if (File.Exists(srcPath))
             {
                 // Create a new image from the source path
-                using (Image srcImage = Image.FromFile(oldPath))
+                using (Image srcImage = Image.FromFile(srcPath))
                 {
                     double srcWidth = srcImage.Width;
                     double srcHeight = srcImage.Height;
@@ -71,12 +81,17 @@ namespace WillOmae
 
                             g.DrawImage(srcImage, destRectangle, 0, 0, (int)srcWidth, (int)srcHeight, GraphicsUnit.Pixel);
 
-                            destImage.Save(newPath);
+                            destImage.Save(destPath);
 
                             return true;
                         }
                     }
                 }
+            }
+            // Revert changes
+            if (File.Exists(destPath))
+            {
+                File.Delete(destPath);
             }
             return false;
         }
